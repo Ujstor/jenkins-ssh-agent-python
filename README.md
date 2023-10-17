@@ -1,12 +1,6 @@
-<style>
-  .center {
-    display: block;
-    margin: 0 auto;
-    margin-bottom: 20px;
-  }
-</style>
+
 <picture>
-  <img class="center" src="https://logos-download.com/wp-content/uploads/2016/10/Jenkins_logo_wordmark.png" width="600px">
+  <img class src="https://logos-download.com/wp-content/uploads/2016/10/Jenkins_logo_wordmark.png" width="600px">
 </picture>
 
 # Jenkins Custom Python SSH Agent
@@ -45,9 +39,6 @@ Once you have configured your Jenkins environment and set up your job, the pipel
 5. Log in to Docker Hub using your credentials.
 6. Push the Docker image to your Docker Hub repository.
 7. Clean up Docker images on the Jenkins environment.
-
-<br/>
-<br/>
 
 
 # Setting up Jenkins SSH Agent
@@ -136,6 +127,7 @@ Replace `[your-public-key]` with your own SSH public key. You can find your publ
      - Change port if needed; in my case i need use port 2222 
     <br/>
     <br/>
+
     ```bash
     docker run -v /var/run/docker.sock:/var/run/docker.sock -d --rm --name=agent1 -p 2222:22 \
     -e "JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICW/o8iiXXXHmGVRVjPQbps+QWqqQ7fcq9BR0vAXwbg9 root@ubuntu-1" \
