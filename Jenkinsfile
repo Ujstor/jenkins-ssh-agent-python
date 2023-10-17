@@ -6,14 +6,18 @@ pipeline {
         GITHUB_REPO = ''
         DOCKER_HUB_USERNAME = ''
         DOCKER_REPO_NAME = ''
+        BRANCH = ''
         VERSION_PART = 'Patch' // Patch, Minor, Major
-        TAG = ''
+        DOCKER_JENKINS_CERDIDENTALS_ID = ''
+        TAG = '' // Generate automatically
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git(url: 'https://github.com/${GITHUB_USER}/${GITHUB_REPO}/', branch: env.BRANCH_NAME)
+                script {
+                    git(url: "https://github.com/${GITHUB_USER}/${GITHUB_REPO}/", branch: env.BRANCH_NAME)
+                }
             }
         }
 
@@ -27,7 +31,7 @@ pipeline {
 
         stage('Generate Docker Image Tag') {
             when {
-                expression { env.BRANCH_NAME == 'master' }
+                expression { env.BRANCH_NAME == env.BRANCH}
             }
             steps {
                 script {
@@ -44,9 +48,23 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Docker Login') {
             when {
                 expression { env.BRANCH_NAME == 'master' }
+            }
+            steps {
+                script {
+
+                    withCredentials([usernamePassword(credentialsId: env.DOCKER_JENKINS_CERDIDENTALS_ID, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            when {
+                expression { env.BRANCH_NAME == env.BRANCH }
             }
             steps {
                 script {
@@ -55,25 +73,9 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
-            when {
-                expression { env.BRANCH_NAME == 'master' }
-            }
-            steps {
-                script {
-
-                    def dockerCredentialsId = 'be9636c4-b828-41af-ad0b-46d4182dfb06'
-
-                    withCredentials([usernamePassword(credentialsId: dockerCredentialsId, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
-                    }
-                }
-            }
-        }
-
         stage('Deploy') {
             when {
-                expression { env.BRANCH_NAME == 'master' }
+                expression { env.BRANCH_NAME == env.BRANCH }
             }
             steps {
                 script {
@@ -84,7 +86,7 @@ pipeline {
 
         stage('Environment Cleanup') {
             when {
-                expression { env.BRANCH_NAME == 'master' }
+                expression { env.BRANCH_NAME == env.BRANCH }
             }
             steps {
                 script {
